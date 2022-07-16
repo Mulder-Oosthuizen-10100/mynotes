@@ -29,6 +29,13 @@
             {
               "client_id": "385772200349-lf17mguvbqarcrcavjbmb57blbbuu6ot.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "385772200349-k43mmknssaqs2ammdifv13jscggn79bn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "oosthuizen.mulder.mynotes"
+              }
             }
           ]
         }

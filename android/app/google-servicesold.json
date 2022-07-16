@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "385772200349",
+    "project_id": "mynotes-project-mulder-android",
+    "storage_bucket": "mynotes-project-mulder-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:385772200349:android:43b5f99732132856fdcf74",
+        "android_client_info": {
+          "package_name": "oosthuizen.mulder.mynotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "385772200349-lf17mguvbqarcrcavjbmb57blbbuu6ot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjvAAA0_Yb06hQW1ZMyumMgh8XDcxoSgQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "385772200349-lf17mguvbqarcrcavjbmb57blbbuu6ot.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
