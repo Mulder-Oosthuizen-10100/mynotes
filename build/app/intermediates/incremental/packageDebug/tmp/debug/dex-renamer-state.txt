@@ -1,4 +1,4 @@
-#Sat Jul 16 20:48:56 CAT 2022
+#Sun Jul 17 21:50:15 CAT 2022
 base.2=C\:\\Users\\muldero\\Documents\\Mulder\\Development\\Flutter\\Projects\\mynotes\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes3.dex
 path.2=classes3.dex
 base.1=C\:\\Users\\muldero\\Documents\\Mulder\\Development\\Flutter\\Projects\\mynotes\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes2.dex

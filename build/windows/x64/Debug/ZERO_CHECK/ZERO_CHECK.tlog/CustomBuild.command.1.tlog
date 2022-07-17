@@ -1,0 +1,10 @@
+^C:\USERS\MULDERO\DOCUMENTS\MULDER\DEVELOPMENT\FLUTTER\PROJECTS\MYNOTES\BUILD\WINDOWS\CMAKEFILES\D3A161BC56CC8C658DE296B1A8F384C1\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/muldero/Documents/Mulder/Development/Flutter/Projects/mynotes/windows -BC:/Users/muldero/Documents/Mulder/Development/Flutter/Projects/mynotes/build/windows --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/muldero/Documents/Mulder/Development/Flutter/Projects/mynotes/build/windows/mynotes.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
