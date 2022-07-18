@@ -8,9 +8,12 @@ class AuthUser {
 
 // const beacuse the attr is a final (not null and will not change once set)
   const AuthUser(
-    this.isEmailVerified,
-  );
+      {required this.isEmailVerified}); // required makes the bellow possible
+// void testing {
+  // AuthUser(isEmailVerified: true);
+// }
 
 // If this AuthUser class is called it will be created with the given user
-  factory AuthUser.fromFirebase(User user) => AuthUser(user.emailVerified);
+  factory AuthUser.fromFirebase(User user) =>
+      AuthUser(isEmailVerified: user.emailVerified);
 }
