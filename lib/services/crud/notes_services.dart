@@ -19,9 +19,7 @@ class NotesService {
     _notesStreamController.add(_notes);
   }
 
-  // Future<DatabaseUser> getOrCreateUser({required String email}) async {
-  // add code
-  // }
+  // Future<DatabaseUser> getOrCreateUser({required String email}) async {}
 
   Future<DatabaseNotes> updateNote({
     required DatabaseNotes note,
