@@ -4,16 +4,21 @@ import 'package:flutter/cupertino.dart';
 // The variables of this class will never change
 @immutable
 class AuthUser {
+  final String? email;
   final bool isEmailVerified;
 
 // const beacuse the attr is a final (not null and will not change once set)
-  const AuthUser(
-      {required this.isEmailVerified}); // required makes the bellow possible
+  const AuthUser({
+    required this.email,
+    required this.isEmailVerified,
+  }); // required makes the bellow possible
 // void testing {
   // AuthUser(isEmailVerified: true);
 // }
 
 // If this AuthUser class is called it will be created with the given user
-  factory AuthUser.fromFirebase(User user) =>
-      AuthUser(isEmailVerified: user.emailVerified);
+  factory AuthUser.fromFirebase(User user) => AuthUser(
+        email: user.email,
+        isEmailVerified: user.emailVerified,
+      );
 }

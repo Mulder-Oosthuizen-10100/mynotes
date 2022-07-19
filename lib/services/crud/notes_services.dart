@@ -10,8 +10,26 @@ class NotesService {
 
   List<DatabaseNotes> _notes = [];
 
+  static final NotesService _shared = NotesService._sharedInstance();
+  NotesService._sharedInstance();
+  factory NotesService() => _shared; // <- this is the constructor
+
   final _notesStreamController =
       StreamController<List<DatabaseNotes>>.broadcast();
+
+  Stream<List<DatabaseNotes>> get allNotes => _notesStreamController.stream;
+
+  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+    try {
+      final user = await getUser(email: email);
+      return user;
+    } on CouldNotFindNote {
+      final createdUser = await createUser(email: email);
+      return createdUser;
+    } catch (e) {
+      rethrow; // used for debugging
+    }
+  }
 
   Future<void> _cashNotes() async {
     final allNotes = await getAllNotes();
@@ -19,12 +37,11 @@ class NotesService {
     _notesStreamController.add(_notes);
   }
 
-  // Future<DatabaseUser> getOrCreateUser({required String email}) async {}
-
   Future<DatabaseNotes> updateNote({
     required DatabaseNotes note,
     required String text,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     // make sure note exists
     await getNote(id: note.id);
@@ -46,12 +63,14 @@ class NotesService {
   }
 
   Future<Iterable<DatabaseNotes>> getAllNotes() async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(noteTable);
     return notes.map((noteRow) => DatabaseNotes.fromRow(noteRow));
   }
 
   Future<DatabaseNotes> getNote({required int id}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
       noteTable,
@@ -72,6 +91,7 @@ class NotesService {
   }
 
   Future<int> deleteAllNotes() async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final numberOfDeletions = await db.delete(noteTable);
     _notes = [];
@@ -80,6 +100,7 @@ class NotesService {
   }
 
   Future<void> deleteNote({required int id}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final delelteCount = await db.delete(
       noteTable,
@@ -95,6 +116,7 @@ class NotesService {
   }
 
   Future<DatabaseNotes> createNote({required DatabaseUser owner}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     // Make sure owner does exist in the DB with the correct email
     final dbUser = await getUser(email: owner.email);
@@ -120,6 +142,7 @@ class NotesService {
   }
 
   Future<DatabaseUser> getUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
@@ -135,6 +158,7 @@ class NotesService {
   }
 
   Future<DatabaseUser> createUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
@@ -156,6 +180,7 @@ class NotesService {
   }
 
   Future<void> deleteUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final deletedCount = await db.delete(
       userTable,
@@ -184,6 +209,14 @@ class NotesService {
     } else {
       await db.close();
       _db = null;
+    }
+  }
+
+  Future<void> _ensureDbIsOpen() async {
+    try {
+      await open();
+    } on DatabaseAlreadyOpenException {
+      // let it go
     }
   }
 
@@ -269,17 +302,17 @@ const emailColumn = 'email';
 const userIdColumn = 'user_id';
 const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
-const createUserTable = '''CREATE TABEL IF NOT EXISTS "user" (
-          "id" INTERGER NOT NULL, 
+const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
+          "id" INTEGER NOT NULL UNIQUE, 
           "email" TEXT NOT NULL UNIQUE, 
-          PRIMARY KEY ("id" AUTOINCREMENT)
+          PRIMARY KEY("id" AUTOINCREMENT)
         );''';
-const createNoteTable = '''CREATE TABLE IF NOT EXISTS "notes" (
-        "id" INTEGER NOT NULL,
-        "user_id" INTERGER NOT NULL, 
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
+        "id" INTEGER NOT NULL UNIQUE,
+        "user_id" INTEGER NOT NULL, 
         "text" TEXT,
         "is_synced_with_cloud" INTEGER NOT NULL DEFAULT 0,
-        FORIGN KEY("user_id") REFERENCES "user"("id"),
-        PRIMARY KEY("id") AUTOINCREMENT)
+        FOREIGN KEY("user_id") REFERENCES "user"("id"),
+        PRIMARY KEY("id" AUTOINCREMENT)
       );
       ''';
