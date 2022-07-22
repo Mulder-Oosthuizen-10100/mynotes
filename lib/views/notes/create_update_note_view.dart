@@ -120,7 +120,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_services.dart';
-import 'package:mynotes/utilities/dialogs/generics/get_arguments.dart';
+import 'package:mynotes/utilities/generics/get_arguments.dart';
 import 'package:mynotes/services/cloud/cloud_note.dart';
 import 'package:mynotes/services/cloud/firebase_cloud_storage.dart';
 

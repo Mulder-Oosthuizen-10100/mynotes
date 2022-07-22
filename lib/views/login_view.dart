@@ -5,7 +5,9 @@ import 'package:mynotes/services/auth/auth_exceptions.dart';
 // import 'package:mynotes/services/auth/auth_services.dart';
 import 'package:mynotes/services/auth/bloc/auth_bloc.dart';
 import 'package:mynotes/services/auth/bloc/auth_event.dart';
+import 'package:mynotes/services/auth/bloc/auth_state.dart';
 import 'package:mynotes/utilities/dialogs/error_dialog.dart';
+import 'package:mynotes/utilities/dialogs/loading_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -17,6 +19,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  CloseDialog? _closeDialogHandel;
 
   @override
   void initState() {
@@ -34,41 +37,65 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _email,
-            enableSuggestions: true,
-            autocorrect: false,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: 'Enter your email here',
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) async {
+        if (state is AuthStateLoggedOut) {
+          final closeDialog = _closeDialogHandel;
+
+          // close or show the loading dialog
+          if (!state.isLoading && closeDialog != null) {
+            closeDialog();
+            _closeDialogHandel = null;
+          } else if (state.isLoading && closeDialog == null) {
+            _closeDialogHandel = showLoadingDialog(
+              context: context,
+              text: 'Loading...',
+            );
+          }
+          if (state.exception is UserNotFoundException) {
+            await showErrorDialog(context, 'User not found');
+          } else if (state.exception is WrongPasswordException) {
+            await showErrorDialog(context, 'Wrong credentials');
+          } else if (state.exception is GenericAuthException) {
+            await showErrorDialog(context, 'Authentication error');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Login'),
+        ),
+        body: Column(
+          children: [
+            TextField(
+              controller: _email,
+              enableSuggestions: true,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: 'Enter your email here',
+              ),
             ),
-          ),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'Enter your password here',
+            TextField(
+              controller: _password,
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                hintText: 'Enter your password here',
+              ),
             ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
-              try {
+            TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
                 context.read<AuthBloc>().add(
                       AuhtEventlogIn(
                         email,
                         password,
                       ),
                     );
+                // try {
 
                 // await AuthService.firebase().logIn(
                 //   email: email,
@@ -90,35 +117,39 @@ class _LoginViewState extends State<LoginView> {
                 //     );
                 //   }
                 // }
-              } on UserNotFoundException {
-                showErrorDialog(
-                  context,
-                  'User not found',
-                );
-              } on WrongPasswordException {
-                showErrorDialog(
-                  context,
-                  'Wrong credentials',
-                );
-              } on GeneralAuthException {
-                showErrorDialog(
-                  context,
-                  'Authentication Error',
-                );
-              }
-            },
-            child: const Text('Login'),
-          ),
-          TextButton(
-            onPressed: () => {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                registerRout,
-                (route) => false,
-              ),
-            },
-            child: const Text('Not Registered yet? Register here!'),
-          ),
-        ],
+                // } on UserNotFoundException {
+                //   showErrorDialog(
+                //     context,
+                //     'User not found',
+                //   );
+                // } on WrongPasswordException {
+                //   showErrorDialog(
+                //     context,
+                //     'Wrong credentials',
+                //   );
+                // } on GenericAuthException {
+                //   showErrorDialog(
+                //     context,
+                //     'Authentication Error',
+                //   );
+                // }
+              },
+              child: const Text('Login'),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(
+                      const AuthEventShouldRegister(),
+                    );
+                // Navigator.of(context).pushNamedAndRemoveUntil(
+                //   registerRout,
+                //   (route) => false,
+                // ),
+              },
+              child: const Text('Not Registered yet? Register here!'),
+            ),
+          ],
+        ),
       ),
     );
   }

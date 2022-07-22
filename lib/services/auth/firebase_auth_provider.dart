@@ -31,10 +31,10 @@ class FirebaseAuthProvider implements AuthProvider {
       } else if (e.code == 'invalid-email') {
         throw InvalidEmailException();
       } else {
-        throw GeneralAuthException();
+        throw GenericAuthException();
       }
     } catch (_) {
-      throw GeneralAuthException();
+      throw GenericAuthException();
     }
   }
 
@@ -70,10 +70,10 @@ class FirebaseAuthProvider implements AuthProvider {
       } else if (e.code == 'wrong-password') {
         throw WrongPasswordException();
       } else {
-        throw GeneralAuthException();
+        throw GenericAuthException();
       }
     } catch (_) {
-      throw GeneralAuthException();
+      throw GenericAuthException();
     }
   }
 
