@@ -4,7 +4,52 @@ import 'package:mynotes/services/auth/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(AuthProvider provider) : super(const AuthStateUninitialize()) {
+  AuthBloc(AuthProvider provider)
+      : super(const AuthStateUninitialize(isLoading: true)) {
+    on<AuthEventShouldRegister>(
+      (event, emit) {
+        emit(const AuthStateRegistering(
+          exception: null,
+          isLoading: false,
+        ));
+      },
+    );
+
+    // forgot password
+    on<AuthEventForgotPassword>((event, emit) async {
+      emit(const AuthStateForgotPassword(
+        exception: null,
+        hasSentEmail: false,
+        isLoading: false,
+      ));
+      final email = event.email;
+      if (email == null) {
+        return; // user just ended on screen
+      }
+      emit(const AuthStateForgotPassword(
+        exception: null,
+        hasSentEmail: false,
+        isLoading: true,
+      ));
+
+      bool didSendEmail;
+      Exception? exception;
+      try {
+        await provider.sendPasswordReset(toEmail: email);
+        didSendEmail = true;
+        exception = null;
+      } on Exception catch (e) {
+        didSendEmail = false;
+        exception = e;
+      }
+
+      emit(AuthStateForgotPassword(
+        exception: exception,
+        hasSentEmail: didSendEmail,
+        isLoading: false,
+      ));
+    });
+
     // Send email verification
     on<AuthEventSendEmailVerification>((event, emit) async {
       await provider.sendEmailVerification();
@@ -22,9 +67,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             password: password,
           );
           await provider.sendEmailVerification();
-          emit(const AuthStateNeedsVerification());
+          emit(const AuthStateNeedsVerification(isLoading: false));
         } on Exception catch (e) {
-          emit(AuthStateRegistering(e));
+          emit(AuthStateRegistering(
+            exception: e,
+            isLoading: false,
+          ));
         }
       },
     );
@@ -42,10 +90,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             ),
           );
         } else if (!user.isEmailVerified) {
-          emit(const AuthStateNeedsVerification());
+          emit(const AuthStateNeedsVerification(isLoading: false));
         } else {
+          // user is not const therefore we cannot call const AuthStateLoggedIn
           emit(AuthStateLoggedIn(
-              user)); // user is not const therefore we cannot call const AuthStateLoggedIn
+            user: user,
+            isLoading: false,
+          ));
         }
       },
     );
@@ -54,9 +105,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (event, emit) async {
         emit(
           const AuthStateLoggedOut(
-            isLoading: true,
-            exception: null,
-          ),
+              isLoading: true,
+              exception: null,
+              loadingText: 'PLease wait while we log you in'),
         );
         final email = event.email;
         final password = event.password;
@@ -74,7 +125,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 exception: null,
               ),
             );
-            emit(const AuthStateNeedsVerification());
+            emit(const AuthStateNeedsVerification(isLoading: false));
           } else {
             emit(
               const AuthStateLoggedOut(
@@ -82,7 +133,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 exception: null,
               ),
             );
-            emit(AuthStateLoggedIn(user));
+            emit(AuthStateLoggedIn(
+              user: user,
+              isLoading: false,
+            ));
           }
         } on Exception catch (e) {
           emit(
